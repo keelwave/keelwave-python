@@ -19,12 +19,13 @@ from ._context import get_current_run
 from .async_client import AsyncKeelwave
 from .async_run import AsyncRun
 from .client import Keelwave
-from .run import Run
+from .run import Run, TerminationReason
 
 __all__ = [
     "Keelwave",
     "AsyncKeelwave",
     "Run",
+    "TerminationReason",
     "AsyncRun",
     "get_current_run",
     "ParsedAnthropicResponse",

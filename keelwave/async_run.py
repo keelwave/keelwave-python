@@ -8,6 +8,7 @@ from types import TracebackType
 from typing import TYPE_CHECKING, Any
 
 from ._context import reset_current_run, set_current_run
+from .run import TerminationReason
 
 if TYPE_CHECKING:
     from .async_client import AsyncKeelwave
@@ -37,6 +38,7 @@ class AsyncRun:
         self._output: str | None = None
         self._loop_detected = False
         self._loop_step_index: int | None = None
+        self._termination_reason: TerminationReason | None = None
         self._ctx_token: Token | None = None
         self._seen_fingerprints: dict[str, int] = {}  # fingerprint → first step_index
 
@@ -80,7 +82,12 @@ class AsyncRun:
         if self._id is None or self._timestamp is None:
             return
         status = "completed" if exc_type is None else "failed"
-        reason = "clean" if exc_type is None else "error"
+        # A raise outranks anything set earlier; otherwise honour the caller.
+        reason = (
+            "error"
+            if exc_type is not None
+            else (self._termination_reason or "clean")
+        )
         duration_ms = (
             int((time.monotonic() - self._t_start) * 1000)
             if self._t_start is not None
@@ -174,6 +181,17 @@ class AsyncRun:
 
     def set_output(self, output: str) -> None:
         self._output = output
+
+    def set_termination_reason(self, reason: TerminationReason) -> None:
+        """Record why the run ended. Only the caller knows this — the SDK
+        cannot see a step budget or a context limit, and a run that looped but
+        recovered is still a clean finish. Left unset, exit reports "clean", or
+        "error" if the body raised."""
+        self._termination_reason = reason
+
+    @property
+    def termination_reason(self) -> TerminationReason | None:
+        return self._termination_reason
 
     def mark_loop(self, step_index: int | None = None) -> None:
         self._loop_detected = True

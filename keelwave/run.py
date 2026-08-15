@@ -5,7 +5,16 @@ import json
 import time
 from contextvars import Token
 from types import TracebackType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
+
+TerminationReason = Literal[
+    "clean",
+    "max_steps_reached",
+    "context_limit",
+    "error",
+    "loop_detected",
+    "timeout",
+]
 
 from ._context import reset_current_run, set_current_run
 
@@ -45,6 +54,7 @@ class Run:
         self._output: str | None = None
         self._loop_detected = False
         self._loop_step_index: int | None = None
+        self._termination_reason: TerminationReason | None = None
         self._ctx_token: Token | None = None
         self._seen_fingerprints: dict[str, int] = {}  # fingerprint → first step_index
 
@@ -84,7 +94,12 @@ class Run:
         if self._id is None or self._timestamp is None:
             return
         status = "completed" if exc_type is None else "failed"
-        reason = "clean" if exc_type is None else "error"
+        # A raise outranks anything set earlier; otherwise honour the caller.
+        reason = (
+            "error"
+            if exc_type is not None
+            else (self._termination_reason or "clean")
+        )
         duration_ms = (
             int((time.monotonic() - self._t_start) * 1000)
             if self._t_start is not None
@@ -178,6 +193,17 @@ class Run:
 
     def set_output(self, output: str) -> None:
         self._output = output
+
+    def set_termination_reason(self, reason: TerminationReason) -> None:
+        """Record why the run ended. Only the caller knows this — the SDK
+        cannot see a step budget or a context limit, and a run that looped but
+        recovered is still a clean finish. Left unset, exit reports "clean", or
+        "error" if the body raised."""
+        self._termination_reason = reason
+
+    @property
+    def termination_reason(self) -> TerminationReason | None:
+        return self._termination_reason
 
     def mark_loop(self, step_index: int | None = None) -> None:
         """Mark this run as a loop. step_index = the first repeated step
