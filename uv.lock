@@ -1725,6 +1725,21 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
+]
+
+[package.optional-dependencies]
+all = [
+    { name = "anthropic" },
+    { name = "openai" },
+    { name = "pydantic-ai" },
+]
+anthropic = [
+    { name = "anthropic" },
+]
+openai = [
+    { name = "openai" },
+]
+pydantic-ai = [
     { name = "pydantic-ai" },
 ]
 
@@ -1734,6 +1749,7 @@ dev = [
     { name = "ddgs" },
     { name = "mypy" },
     { name = "openai" },
+    { name = "pydantic-ai" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-dotenv" },
@@ -1742,9 +1758,13 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=0.109.1,<1" },
     { name = "httpx", specifier = ">=0.28.1" },
-    { name = "pydantic-ai", specifier = ">=1.107.0" },
+    { name = "keelwave", extras = ["anthropic", "openai", "pydantic-ai"], marker = "extra == 'all'" },
+    { name = "openai", marker = "extra == 'openai'", specifier = ">=1.60,<4" },
+    { name = "pydantic-ai", marker = "extra == 'pydantic-ai'", specifier = ">=1.107,<3" },
 ]
+provides-extras = ["anthropic", "openai", "pydantic-ai", "all"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1752,6 +1772,7 @@ dev = [
     { name = "ddgs", specifier = ">=9.14.4" },
     { name = "mypy", specifier = ">=1.0.0,<2" },
     { name = "openai", specifier = ">=2.41.0" },
+    { name = "pydantic-ai", specifier = ">=1.107.0" },
     { name = "pytest", specifier = ">=9.0.3" },
     { name = "pytest-asyncio", specifier = ">=1.4.0" },
     { name = "pytest-dotenv", specifier = ">=0.5.2" },

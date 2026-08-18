@@ -31,10 +31,16 @@ from ..async_client import AsyncKeelwave
 from ..async_run import AsyncRun
 from ..client import Keelwave
 from ..run import Run
-from pydantic_ai.messages import (
-    FunctionToolCallEvent,
-    FunctionToolResultEvent,
-)
+try:
+    from pydantic_ai.messages import (
+        FunctionToolCallEvent,
+        FunctionToolResultEvent,
+    )
+except ModuleNotFoundError as exc:
+    raise ModuleNotFoundError(
+        "keelwave's pydantic-ai adapter requires pydantic-ai. "
+        "Install it with: pip install 'keelwave[pydantic-ai]'"
+    ) from exc
 
 
 async def run_with_steps(

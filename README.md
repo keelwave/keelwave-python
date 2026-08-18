@@ -16,7 +16,16 @@ config: wrap your LLM client or decorate your agent, and the run is traced.
 pip install keelwave
 ```
 
-Requires Python 3.10+.
+Requires Python 3.10+. The base install pulls in `httpx` and nothing else.
+
+Provider adapters need their own SDK, available as extras:
+
+```bash
+pip install 'keelwave[openai]'        # wrap_openai
+pip install 'keelwave[anthropic]'     # wrap_anthropic
+pip install 'keelwave[pydantic-ai]'   # adapters.pydantic_ai
+pip install 'keelwave[all]'           # all three
+```
 
 The SDK needs a running keelwave server to send traces to. Self-host it from the
 core repo: [github.com/keelwave/keelwave](https://github.com/keelwave/keelwave).

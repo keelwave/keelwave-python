@@ -9,8 +9,13 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "httpx>=0.28.1",
-    "pydantic-ai>=1.107.0",
 ]
+
+[project.optional-dependencies]
+anthropic = ["anthropic>=0.109.1,<1"]
+openai = ["openai>=1.60,<4"]
+pydantic-ai = ["pydantic-ai>=1.107,<3"]
+all = ["keelwave[anthropic,openai,pydantic-ai]"]
 
 [build-system]
 requires = ["uv_build>=0.11.17,<0.12.0"]
@@ -24,6 +29,7 @@ dev = [
     "anthropic>=0.109.1",
     "ddgs>=9.14.4",
     "openai>=2.41.0",
+    "pydantic-ai>=1.107.0",
     "pytest>=9.0.3",
     "pytest-asyncio>=1.4.0",
     "pytest-dotenv>=0.5.2",
