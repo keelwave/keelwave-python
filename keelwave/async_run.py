@@ -148,8 +148,11 @@ class AsyncRun:
             self._total_tokens += tokens
         if cost_usd:
             self._total_cost_usd += cost_usd
-        tool_output: dict | None = (
-            output if isinstance(output, dict) else {"value": str(output)}
+        # tool_output is jsonb, so lists and primitives round-trip as themselves.
+        # str() on a list loses the whole payload — a search returning
+        # [{"title": ...}] used to land as its repr.
+        tool_output: dict | list | None = (
+            output if isinstance(output, (dict, list)) else {"value": output}
         )
         await self._client.ingest_agent_step(
             agent_run_id=self.id,
