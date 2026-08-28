@@ -35,12 +35,27 @@ try:
     from pydantic_ai.messages import (
         FunctionToolCallEvent,
         FunctionToolResultEvent,
+        RetryPromptPart,
     )
 except ModuleNotFoundError as exc:
     raise ModuleNotFoundError(
         "keelwave's pydantic-ai adapter requires pydantic-ai. "
         "Install it with: pip install 'keelwave[pydantic-ai]'"
     ) from exc
+
+
+def _tool_outcome(part: Any) -> tuple[bool, dict[str, Any]]:
+    if isinstance(part, RetryPromptPart):
+        try:
+            text = part.model_response()
+        except Exception:
+            text = str(getattr(part, "content", ""))
+        return False, {"error": text[:2000]}
+    try:
+        text = part.model_response_str()
+    except Exception:
+        text = str(getattr(part, "content", ""))
+    return True, {"result": text[:2000]} if text else {}
 
 
 async def run_with_steps(
@@ -86,20 +101,8 @@ async def run_with_steps(
                     continue
                 tool_name, tool_input, _step = entry
 
-                part = event.part
+                ok, output = _tool_outcome(event.part)
                 try:
-                    output_str: str | None = getattr(part, "content", None)
-                    if output_str is None:
-                        output_str = str(getattr(part, "return_value", ""))
-                except Exception:
-                    output_str = ""
-
-                ok = (
-                    not isinstance(part, type)
-                    and getattr(part, "is_error", False) is False
-                )
-                try:
-                    output = {"result": output_str[:2000]} if output_str else {}
                     run.tool_call(tool_name, input=tool_input, output=output, ok=ok)
                 except Exception as e:
                     warnings.warn(
@@ -162,20 +165,8 @@ async def async_run_with_steps(
                     continue
                 tool_name, tool_input, _step = entry
 
-                part = event.part
+                ok, output = _tool_outcome(event.part)
                 try:
-                    output_str: str | None = getattr(part, "content", None)
-                    if output_str is None:
-                        output_str = str(getattr(part, "return_value", ""))
-                except Exception:
-                    output_str = ""
-
-                ok = (
-                    not isinstance(part, type)
-                    and getattr(part, "is_error", False) is False
-                )
-                try:
-                    output = {"result": output_str[:2000]} if output_str else {}
                     await run.tool_call(
                         tool_name, input=tool_input, output=output, ok=ok
                     )
