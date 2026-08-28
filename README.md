@@ -82,6 +82,12 @@ An async equivalent is available via `AsyncKeelwave` / `AsyncRun`.
 - **Decision steps** — `think`, `tool_call`, `result`, or any custom `step_type`,
   in order, with content and metadata.
 - **Tool calls** — name, input, output, success flag, and latency.
+  Since 0.1.2 the pydantic-ai adapter derives the success flag from the real
+  outcome: a tool that raises `ModelRetry` (or otherwise produces a retry
+  prompt) records a **failed** tool call with `{"error": ...}` as its output.
+  Earlier versions recorded every adapter tool call as successful, so success
+  rates may drop after upgrading — that is the metric becoming accurate.
+  Manual `run.tool_call(..., ok=)` is unchanged (`ok` still defaults to `True`).
 - **Loop detection** — each tool call is fingerprinted (SHA-256 of name + input)
   client-side; the first duplicate marks the run as a loop, with no extra code.
 - **Tokens & cost** — per-step and per-run totals.

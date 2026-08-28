@@ -75,6 +75,19 @@ def test_observe_emits_tool_call_inside_run(client):
             assert "latency_ms" in kwargs
 
 
+def test_observe_emits_ok_false_on_raise(client):
+    @client.observe
+    def broken(q: str) -> str:
+        raise ValueError("boom")
+
+    with client.run("fail-agent", input="test") as run:
+        with mock.patch.object(run, "tool_call", wraps=run.tool_call) as mock_tc:
+            with pytest.raises(ValueError):
+                broken(q="hello")
+            mock_tc.assert_called_once()
+            assert mock_tc.call_args.kwargs["ok"] is False
+
+
 def test_observe_emits_ai_trace_outside_run(client):
     @client.observe(name="standalone_fn")
     def standalone(x: int) -> int:
