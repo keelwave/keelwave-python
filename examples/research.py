@@ -36,7 +36,7 @@ keelwave_client = Keelwave(
     endpoint=os.environ.get("KEELWAVE_ENDPOINT", "http://localhost:8080"),
 )
 
-model = os.environ.get("CLAUDE_MODEL", "deepseek-v4-pro")
+model = os.environ.get("CLAUDE_MODEL", "deepseek-chat")
 provider = os.environ.get("LLM_PROVIDER", "deepseek")
 
 claude = keelwave_client.wrap_anthropic(
