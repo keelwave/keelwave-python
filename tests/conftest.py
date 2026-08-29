@@ -47,6 +47,9 @@ def _server_reachable() -> bool:
 
 @pytest.fixture(scope="session")
 def _sync_project():
+    if key := os.getenv("KEELWAVE_API_KEY"):
+        yield key
+        return
     if not _server_reachable():
         pytest.skip(
             "keelwave server not reachable — run `make db-up && make run` in core/"
@@ -58,6 +61,9 @@ def _sync_project():
 
 @pytest.fixture(scope="session")
 def _async_project():
+    if key := os.getenv("KEELWAVE_API_KEY"):
+        yield key
+        return
     if not _server_reachable():
         pytest.skip(
             "keelwave server not reachable — run `make db-up && make run` in core/"
