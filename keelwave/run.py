@@ -96,9 +96,7 @@ class Run:
         status = "completed" if exc_type is None else "failed"
         # A raise outranks anything set earlier; otherwise honour the caller.
         reason = (
-            "error"
-            if exc_type is not None
-            else (self._termination_reason or "clean")
+            "error" if exc_type is not None else (self._termination_reason or "clean")
         )
         duration_ms = (
             int((time.monotonic() - self._t_start) * 1000)
