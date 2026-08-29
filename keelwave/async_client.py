@@ -167,7 +167,7 @@ class AsyncKeelwave:
         content: str | None = None,
         tool_name: str | None = None,
         tool_input: dict | None = None,
-        tool_output: dict | None = None,
+        tool_output: dict | list | None = None,
         tool_success: bool | None = None,
         tool_latency_ms: int | None = None,
         tokens: int | None = None,

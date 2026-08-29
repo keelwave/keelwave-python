@@ -7,6 +7,8 @@ from contextvars import Token
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Literal
 
+from ._context import reset_current_run, set_current_run
+
 TerminationReason = Literal[
     "clean",
     "max_steps_reached",
@@ -15,8 +17,6 @@ TerminationReason = Literal[
     "loop_detected",
     "timeout",
 ]
-
-from ._context import reset_current_run, set_current_run
 
 if TYPE_CHECKING:
     from .client import Keelwave
